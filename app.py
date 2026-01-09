@@ -5,7 +5,7 @@ from openai import OpenAI
 
 load_dotenv()
 
-st.set_page_config(page_title="AI Math Mentor", page_icon="🧮", layout="wide")
+st.set_page_config(page_title="AI Math Mentor v2", page_icon="🧮", layout="wide")
 st.title("🧮 AI Math Mentor")
 st.markdown("*Solve JEE-style math problems with AI assistance*")
 
