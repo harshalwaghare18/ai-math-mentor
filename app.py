@@ -358,7 +358,7 @@ if solve_button and problem_text:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #888; font-size: 0.9rem;">
-    <p><strong>🚀 AI Math Mentor</strong> | Built by <strong>Harshal Waghare</strong> | M.Tech Final Year Project | Powered by <strong>Groq AI</strong></p>
+    <p><strong>🚀 AI Math Mentor</strong> | Built by <strong>Harshal Waghare</strong> |  AI Engineer Assignment  | Powered by <strong>Groq AI</strong></p>
     <p>📚 Multi-Agent RAG System | 🎯 HITL Feedback | 💾 Memory & Learning</p>
 </div>
 """, unsafe_allow_html=True)
