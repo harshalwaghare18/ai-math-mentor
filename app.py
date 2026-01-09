@@ -190,7 +190,7 @@ def solve_with_groq(problem: str) -> str:
     try:
         # Use the correct Groq API method
         completion = client.chat.completions.create(
-            model="lama-3.1-70b-versatile"
+            model="llama-3.1-70b-versatile",
 
             messages=[
                 {"role": "user", "content": f"""
