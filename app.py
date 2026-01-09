@@ -6,6 +6,11 @@ import pytesseract
 from PIL import Image
 import os
 import tempfile
+import time  # Add this line!
+import streamlit as st
+import os
+from groq import Groq
+# ... rest of imports
 
 
 st.set_page_config(
