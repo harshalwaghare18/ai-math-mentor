@@ -42,4 +42,5 @@ if st.button("Solve Problem", type="primary"):
                 st.error(f"Error: {str(e)}")
 
 st.markdown("---")
-st.markdown("**Powered by Groq** | Free & Fast")
+st.markdown("**AI Math Mentor** | Built by Harshal Waghare | Powered by Groq")
+
