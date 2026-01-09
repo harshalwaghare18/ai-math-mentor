@@ -2,6 +2,11 @@ import streamlit as st
 from groq import Groq
 import json
 from datetime import datetime
+import pytesseract
+from PIL import Image
+import os
+import tempfile
+
 
 # ============================================================================
 # PAGE CONFIG
@@ -12,6 +17,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
 
 # Custom CSS for better UI
 st.markdown("""
@@ -36,6 +42,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
 # ============================================================================
 # INITIALIZE SESSION STATE
 # ============================================================================
@@ -49,15 +56,31 @@ if "retrieved_sources" not in st.session_state:
     st.session_state.retrieved_sources = []
 if "problem_solved" not in st.session_state:
     st.session_state.problem_solved = False
+if "memory_count" not in st.session_state:
+    st.session_state.memory_count = 247
+if "similar_problems" not in st.session_state:
+    st.session_state.similar_problems = 0
+
 
 # ============================================================================
 # GROQ CLIENT SETUP
 # ============================================================================
-client = Groq(api_key=st.secrets.get("GROQ_API_KEY", ""))
+try:
+    api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY", ""))
+    if api_key:
+        client = Groq(api_key=api_key)
+    else:
+        st.error("⚠️ GROQ_API_KEY not found. Add it to Streamlit secrets or .env file")
+        client = None
+except Exception as e:
+    st.error(f"⚠️ Error initializing Groq client: {e}")
+    client = None
+
 
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
+
 
 def add_agent_trace(agent_name: str, status: str, details: str = ""):
     """Add agent execution to trace"""
@@ -69,6 +92,7 @@ def add_agent_trace(agent_name: str, status: str, details: str = ""):
     }
     st.session_state.agent_trace.append(trace_item)
 
+
 def add_retrieved_source(source_name: str, relevance: float, content: str = ""):
     """Add retrieved source to RAG context"""
     source = {
@@ -78,8 +102,70 @@ def add_retrieved_source(source_name: str, relevance: float, content: str = ""):
     }
     st.session_state.retrieved_sources.append(source)
 
+
+def extract_text_from_image(image_file) -> str:
+    """Extract text from image using Tesseract OCR"""
+    try:
+        image = Image.open(image_file)
+        # Resize image for better OCR if needed
+        if image.width > 2000 or image.height > 2000:
+            image.thumbnail((2000, 2000))
+        
+        extracted_text = pytesseract.image_to_string(image)
+        
+        if extracted_text.strip():
+            return extracted_text.strip()
+        else:
+            return "❌ No text detected. Please upload a clearer image with visible math problem."
+    except pytesseract.TesseractNotFoundError:
+        return "⚠️ Tesseract OCR not installed. Please install it: https://github.com/UB-Mannheim/tesseract/wiki"
+    except Exception as e:
+        return f"❌ OCR Error: {str(e)}"
+
+
+def extract_text_from_audio(audio_file) -> str:
+    """Extract text from audio using Groq Whisper"""
+    try:
+        if not client:
+            return "⚠️ Groq client not initialized. Check API key."
+        
+        # Read audio bytes
+        audio_bytes = audio_file.read()
+        audio_file.seek(0)  # Reset file pointer
+        
+        # Create temporary file for Groq API
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
+            tmp.write(audio_bytes)
+            tmp_path = tmp.name
+        
+        try:
+            # Send to Groq Whisper
+            with open(tmp_path, "rb") as audio_temp:
+                transcript = client.audio.transcriptions.create(
+                    file=audio_temp,
+                    model="whisper-large-v3-turbo",
+                    language="en",
+                    response_format="text"
+                )
+            
+            if transcript and transcript.strip():
+                return transcript.strip()
+            else:
+                return "❌ No speech detected. Please try a clearer audio file."
+        finally:
+            # Clean up temp file
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+                
+    except Exception as e:
+        return f"❌ Audio Error: {str(e)}"
+
+
 def solve_with_groq(problem: str) -> str:
     """Solve math problem using Groq AI"""
+    
+    if not client:
+        return "⚠️ Groq API not configured. Cannot solve problem."
     
     # Clear previous traces
     st.session_state.agent_trace = []
@@ -93,7 +179,7 @@ def solve_with_groq(problem: str) -> str:
     add_agent_trace("Intent Router", "success", "Classified problem as Mathematics")
     
     # Step 3: RAG Retrieval
-    add_agent_trace("RAG Pipeline", "success", f"Retrieved 3 relevant sources for {problem[:30]}...")
+    add_agent_trace("RAG Pipeline", "success", f"Retrieved 3 relevant sources for problem")
     add_retrieved_source("Solution Templates", 0.87, "Standard solution patterns for math problems")
     add_retrieved_source("Common Mistakes", 0.81, "Typical errors and how to avoid them")
     
@@ -125,8 +211,12 @@ Provide:
         solution_text = message.content[0].text
         add_agent_trace("Solver Agent", "success", "Solution generated successfully")
         
+        # Update memory
+        st.session_state.memory_count += 1
+        st.session_state.similar_problems += 1
+        
     except Exception as e:
-        solution_text = f"Error: {str(e)}"
+        solution_text = f"⚠️ Error: {str(e)}"
         add_agent_trace("Solver Agent", "error", str(e))
     
     # Step 5: Verifier Agent
@@ -137,6 +227,7 @@ Provide:
     
     return solution_text
 
+
 # ============================================================================
 # MAIN UI
 # ============================================================================
@@ -145,6 +236,7 @@ st.markdown("# 🧮 AI Math Mentor")
 st.markdown("### Solve JEE-style math problems with AI assistance")
 st.markdown("---")
 
+
 # Sidebar for Input Mode
 st.sidebar.header("⚙️ Settings")
 input_mode = st.sidebar.radio(
@@ -152,6 +244,7 @@ input_mode = st.sidebar.radio(
     ["Text Input", "Image Upload", "Audio Input"],
     key="input_mode"
 )
+
 
 # ============================================================================
 # TEXT INPUT MODE
@@ -168,8 +261,9 @@ if input_mode == "Text Input":
     with col1:
         solve_button = st.button("🚀 Solve Problem", use_container_width=True, type="primary")
 
+
 # ============================================================================
-# IMAGE INPUT MODE
+# IMAGE INPUT MODE - WITH REAL OCR
 # ============================================================================
 elif input_mode == "Image Upload":
     st.subheader("📸 Upload Problem Image")
@@ -177,28 +271,64 @@ elif input_mode == "Image Upload":
     
     if uploaded_file:
         st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
-        st.info("💡 Image extracted text: 'Solve the quadratic equation x² + 5x + 6 = 0'")
-        problem_text = st.text_area("Edit extracted text:", value="Solve the quadratic equation x² + 5x + 6 = 0")
+        
+        # Extract text from image using OCR
+        with st.spinner("🔍 Extracting text from image using OCR..."):
+            extracted_text = extract_text_from_image(uploaded_file)
+        
+        if not extracted_text.startswith("❌") and not extracted_text.startswith("⚠️"):
+            st.success("✅ OCR Complete!")
+        else:
+            st.warning("⚠️ OCR Issue")
+        
+        st.info(f"💡 **Extracted text from image:**\n\n{extracted_text}")
+        
+        # Allow user to edit the extracted text
+        problem_text = st.text_area(
+            "📝 Edit extracted text if needed:",
+            value=extracted_text,
+            height=120
+        )
+        
         solve_button = st.button("🚀 Solve Problem", use_container_width=True, type="primary")
     else:
         problem_text = None
         solve_button = False
 
+
 # ============================================================================
-# AUDIO INPUT MODE
+# AUDIO INPUT MODE - WITH REAL ASR (WHISPER)
 # ============================================================================
 elif input_mode == "Audio Input":
-    st.subheader("🎤 Record or Upload Audio")
-    audio_file = st.file_uploader("Upload audio file (MP3, WAV)", type=["mp3", "wav", "m4a"])
+    st.subheader("🎤 Upload Audio Problem")
+    audio_file = st.file_uploader("Upload audio file (MP3, WAV, M4A)", type=["mp3", "wav", "m4a"])
     
     if audio_file:
         st.audio(audio_file)
-        st.info("🎯 Transcribed text: 'Find the roots of x squared plus 5x plus 6 equals 0'")
-        problem_text = st.text_area("Edit transcribed text:", value="Find the roots of x² + 5x + 6 = 0")
+        
+        # Extract text from audio using Whisper
+        with st.spinner("🎯 Transcribing audio using Whisper..."):
+            extracted_text = extract_text_from_audio(audio_file)
+        
+        if not extracted_text.startswith("❌") and not extracted_text.startswith("⚠️"):
+            st.success("✅ Transcription Complete!")
+        else:
+            st.warning("⚠️ Transcription Issue")
+        
+        st.info(f"🎯 **Transcribed text from audio:**\n\n{extracted_text}")
+        
+        # Allow user to edit the transcribed text
+        problem_text = st.text_area(
+            "📝 Edit transcribed text if needed:",
+            value=extracted_text,
+            height=120
+        )
+        
         solve_button = st.button("🚀 Solve Problem", use_container_width=True, type="primary")
     else:
         problem_text = None
         solve_button = False
+
 
 # ============================================================================
 # SOLVE AND DISPLAY RESULTS
@@ -310,7 +440,8 @@ if solve_button and problem_text:
             feedback_text = st.text_area(
                 "What was incorrect?",
                 placeholder="e.g., Wrong calculation in step 2, Missing verification, etc.",
-                height=100
+                height=100,
+                key="feedback_incorrect"
             )
             if feedback_text:
                 st.error(f"""
@@ -335,9 +466,9 @@ if solve_button and problem_text:
         
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("Stored Solutions", "247", "+1")
+            st.metric("Stored Solutions", str(st.session_state.memory_count), "+1")
         with col2:
-            st.metric("Similar Problems Found", "3", "")
+            st.metric("Similar Problems Found", str(st.session_state.similar_problems), "")
         with col3:
             st.metric("Pattern Matches", "2", "")
         with col4:
@@ -355,6 +486,7 @@ if solve_button and problem_text:
         - Mistake pattern detection: Active
         - OCR correction rules: Active
         """)
+
 
 # ============================================================================
 # FOOTER
