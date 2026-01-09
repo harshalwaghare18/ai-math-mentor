@@ -31,6 +31,7 @@ if st.button("Solve Problem", type="primary"):
             try:
                 response = client.chat.completions.create(
                     model="gpt-3.5-turbo",
+
                     messages=[
                         {"role": "system", "content": "You are a math tutor. Solve step-by-step."},
                         {"role": "user", "content": raw_input}
