@@ -190,7 +190,8 @@ def solve_with_groq(problem: str) -> str:
     try:
         # Use the correct Groq API method
         completion = client.chat.completions.create(
-            model="mixtral-8x7b-32768",
+            model="llama-3.1-70b-versatile"
+
             messages=[
                 {"role": "user", "content": f"""
 You are an expert math tutor solving JEE-style problems. 
