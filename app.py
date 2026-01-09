@@ -1,20 +1,18 @@
 import streamlit as st
 import os
-from dotenv import load_dotenv
-from openai import OpenAI
+from groq import Groq
 
-load_dotenv()
-
-st.set_page_config(page_title="AI Math Mentor v2", page_icon="🧮", layout="wide")
+st.set_page_config(page_title="AI Math Mentor", page_icon="🧮", layout="wide")
 st.title("🧮 AI Math Mentor")
 st.markdown("*Solve JEE-style math problems with AI assistance*")
 
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    st.error("ERROR: OPENAI_API_KEY not set!")
+# Get Groq API key from Streamlit secrets
+groq_api_key = os.getenv("GROQ_API_KEY")
+if not groq_api_key:
+    st.error("ERROR: GROQ_API_KEY not set!")
     st.stop()
 
-client = OpenAI(api_key=api_key)
+client = Groq(api_key=groq_api_key)
 
 with st.sidebar:
     st.header("Input Mode")
@@ -30,8 +28,7 @@ if st.button("Solve Problem", type="primary"):
         with st.spinner("Solving..."):
             try:
                 response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-
+                    model="mixtral-8x7b-32768",
                     messages=[
                         {"role": "system", "content": "You are a math tutor. Solve step-by-step."},
                         {"role": "user", "content": raw_input}
@@ -47,4 +44,4 @@ if st.button("Solve Problem", type="primary"):
                 st.error(f"Error: {str(e)}")
 
 st.divider()
-st.markdown("**AI Math Mentor** | Powered by GPT-4")
+st.markdown("**AI Math Mentor** | Powered by Groq (Free)")
