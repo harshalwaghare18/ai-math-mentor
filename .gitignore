@@ -1,0 +1,45 @@
+# Python environment
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.venv
+
+# Virtual env bindings (the culprit)
+venv/lib/
+venv/Lib/
+venv/Scripts/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Data & Models
+*.pth
+*.pkl
+*.h5
+*.model
+faiss_index/
+memory/stored/
+
+# Large third-party files
+*.dll
+*.so
+*.dylib
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Streamlit cache
+.streamlit/
+
+# Cache
+.pytest_cache/
+.mypy_cache/

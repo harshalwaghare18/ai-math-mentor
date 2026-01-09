@@ -1,0 +1,58 @@
+# ALGEBRA FORMULAS
+## Quadratic Equation
+For ax² + bx + c = 0
+x = [-b ± √(b² - 4ac)] / 2a
+Discriminant Δ = b² - 4ac
+- If Δ > 0: two real roots
+- If Δ = 0: one real root
+- If Δ < 0: no real roots
+
+## Logarithm Properties
+log(a*b) = log(a) + log(b)
+log(a/b) = log(a) - log(b)
+log(a^n) = n*log(a)
+log_b(x) = log(x) / log(b)
+
+## Binomial Expansion
+(a + b)^n = Σ C(n,k) * a^(n-k) * b^k
+where C(n,k) = n! / (k! * (n-k)!)
+
+# PROBABILITY
+## Basic Rules
+P(A ∪ B) = P(A) + P(B) - P(A ∩ B)
+P(A ∩ B) = P(A) * P(B|A)
+P(A|B) = P(A ∩ B) / P(B)
+
+## Permutations & Combinations
+P(n,r) = n! / (n-r)!
+C(n,r) = n! / (r! * (n-r)!)
+Total subsets of n elements = 2^n
+
+# CALCULUS
+## Derivatives
+d/dx(x^n) = n*x^(n-1)
+d/dx(e^x) = e^x
+d/dx(ln(x)) = 1/x
+d/dx(sin(x)) = cos(x)
+d/dx(cos(x)) = -sin(x)
+Chain rule: d/dx(f(g(x))) = f'(g(x)) * g'(x)
+Product rule: d/dx(f*g) = f'*g + f*g'
+
+## Limits
+lim(x→0) sin(x)/x = 1
+lim(x→0) (1 + x)^(1/x) = e
+L'Hôpital's Rule: lim(f(x)/g(x)) = lim(f'(x)/g'(x)) when indeterminate
+
+# LINEAR ALGEBRA
+## Matrix Operations
+det(AB) = det(A) * det(B)
+(AB)^T = B^T * A^T
+(A^-1)^-1 = A
+Trace(A) = sum of diagonal elements
+Rank of matrix = max linearly independent rows/columns
+
+## Eigenvalues
+For eigenvalue λ: det(A - λI) = 0
+Ax = λx (eigenvector equation)
+Sum of eigenvalues = trace(A)
+Product of eigenvalues = det(A)
