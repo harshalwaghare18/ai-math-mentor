@@ -66,12 +66,17 @@ except Exception as e:
     st.error(f"⚠️ Error: {e}")
     client = None
 
-
 def add_agent_trace(agent_name: str, status: str, details: str = ""):
+    """Log agent execution with elapsed time in seconds"""
+    if "start_time" not in st.session_state:
+        st.session_state.start_time = time.time()
+    
+    elapsed_seconds = round(time.time() - st.session_state.start_time, 1)
+    
     trace_item = {
         "agent": agent_name,
         "status": "✓" if status == "success" else "✗",
-        "timestamp": datetime.now().strftime("%H:%M:%S"),
+        "time": f"{elapsed_seconds}s",  # ✅ SECONDS!
         "details": details
     }
     st.session_state.agent_trace.append(trace_item)
