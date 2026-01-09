@@ -144,11 +144,12 @@ def extract_text_from_audio(audio_file) -> str:
                 transcript = client.audio.transcriptions.create(
                     file=audio_temp,
                     model="whisper-large-v3-turbo",
-                    language="en",
-                    response_format="text"
+                    language="en"
                 )
             
-            if transcript and transcript.strip():
+            if transcript and hasattr(transcript, 'text'):
+                return transcript.text.strip()
+            elif isinstance(transcript, str):
                 return transcript.strip()
             else:
                 return "❌ No speech detected. Please try a clearer audio file."
@@ -187,7 +188,8 @@ def solve_with_groq(problem: str) -> str:
     add_agent_trace("Solver Agent", "processing", "Solving with retrieved context...")
     
     try:
-        message = client.messages.create(
+        # Use the correct Groq API method
+        completion = client.chat.completions.create(
             model="mixtral-8x7b-32768",
             messages=[
                 {"role": "user", "content": f"""
@@ -208,7 +210,7 @@ Provide:
             max_tokens=1024,
         )
         
-        solution_text = message.content[0].text
+        solution_text = completion.choices[0].message.content
         add_agent_trace("Solver Agent", "success", "Solution generated successfully")
         
         # Update memory
