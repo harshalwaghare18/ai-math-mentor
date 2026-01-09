@@ -72,19 +72,22 @@ except Exception as e:
     client = None
 
 def add_agent_trace(agent_name: str, status: str, details: str = ""):
-    """Log agent execution with elapsed time in seconds"""
-    if "start_time" not in st.session_state:
-        st.session_state.start_time = time.time()
+    """Log agent with RESETTABLE elapsed seconds (starts from 0.0s)"""
     
-    elapsed_seconds = round(time.time() - st.session_state.start_time, 1)
+    # RESET timer for each pipeline run - starts from 0.0s!
+    if "agent_pipeline_start" not in st.session_state:
+        st.session_state.agent_pipeline_start = time.time()
+    
+    elapsed_seconds = round(time.time() - st.session_state.agent_pipeline_start, 1)
     
     trace_item = {
         "agent": agent_name,
         "status": "✓" if status == "success" else "✗",
-        "time": f"{elapsed_seconds}s",  # ✅ SECONDS!
+        "time": f"{elapsed_seconds}s",  # 0.3s, 1.2s, 2.8s → PERFECT!
         "details": details
     }
     st.session_state.agent_trace.append(trace_item)
+
 
 
 def add_retrieved_source(source_name: str, relevance: float, content: str = ""):
@@ -147,9 +150,8 @@ def extract_text_from_audio(audio_file) -> str:
 
 
 def solve_with_groq(problem: str) -> str:
-    if not client:
-        return "⚠️ Groq API not configured"
-    
+    # RESET everything for clean pipeline
+    st.session_state.agent_pipeline_start = time.time()  # ✅ Zero timer!
     st.session_state.agent_trace = []
     st.session_state.retrieved_sources = []
     
