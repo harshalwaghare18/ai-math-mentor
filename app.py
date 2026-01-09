@@ -27,7 +27,8 @@ if st.button("Solve Problem", type="primary"):
         with st.spinner("Solving with Groq..."):
             try:
                 response = client.chat.completions.create(
-                    model="llama3-70b-8192",
+                    model="llama-3.3-70b-versatile",
+
 
                     messages=[
                         {"role": "system", "content": "You are an expert math tutor. Solve step-by-step clearly."},
