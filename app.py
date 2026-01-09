@@ -308,7 +308,7 @@ if solve_button and problem_text:
             agent_data.append({
                 "Agent": trace["agent"],
                 "Status": trace["status"],
-                "Time": trace["timestamp"],
+                "Time": trace["time"],
                 "Details": trace["details"]
             })
         
