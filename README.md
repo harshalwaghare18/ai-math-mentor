@@ -229,9 +229,9 @@ Tesseract OCR: brew install tesseract (Mac)
 
 **Built with ❤️ by Harshal Waghare**
 
-M.Tech AI/ML | Aspiring AI Engineer
+Cloud-DevOps Engineer 
 
-[LinkedIn](https://linkedin.com/in/harshalwaghare18) | [Portfolio](your-portfolio-link) | [GitHub](https://github.com/harshalwaghare18)
+[LinkedIn](https://linkedin.com/in/harshalwaghare18) | [Portfolio](https://harshalwaghare18.github.io/my_portfolio/) | [GitHub](https://github.com/harshalwaghare18)
 
 ---
 
@@ -248,4 +248,5 @@ M.Tech AI/ML | Aspiring AI Engineer
 **🔗 Live Demo:** https://ai-math-mentor-yaceeram77xrmobfiyr2mk.streamlit.app/
 
 **📦 GitHub:** https://github.com/harshalwaghare18/ai-math-mentor
+
 
