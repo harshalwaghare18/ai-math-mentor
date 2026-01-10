@@ -200,13 +200,7 @@ Tesseract OCR: brew install tesseract (Mac)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open Pull Request
 
----
 
-## 📄 **License**
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
 
 ## 🙏 **Acknowledgments**
 
@@ -254,3 +248,4 @@ M.Tech AI/ML | Aspiring AI Engineer
 **🔗 Live Demo:** https://ai-math-mentor-yaceeram77xrmobfiyr2mk.streamlit.app/
 
 **📦 GitHub:** https://github.com/harshalwaghare18/ai-math-mentor
+
